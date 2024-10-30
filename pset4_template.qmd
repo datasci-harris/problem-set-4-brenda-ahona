@@ -44,8 +44,19 @@ Please refer to the minilesson on code style
 ## Download and explore the Provider of Services (POS) file (10 pts)
 
 1. 
+
+```{python}
+import pandas as pd
+import altair as alt
+
+pos2016 = pd.read_csv('/Users/ahonaroy/Documents/GitHub/POS_File_Hospital_Non_Hospital_Facilities_Q4_2016.csv')
+
+```
+
+We pulled provider category, facility name, original participation date, provider number, state code, termination experiration date, and zip codes. 
+
 2. 
-    a.
+    a. 
     b.
 3. 
 4. 
