@@ -1,5 +1,5 @@
 ---
-title: "Your Title"
+title: "Brenda Castaneda and Ahona Roy"
 format: 
   pdf:
     keep-tex: true
