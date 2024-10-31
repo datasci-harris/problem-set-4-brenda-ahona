@@ -79,30 +79,52 @@ short_term_16 = hospitals_16[(hospitals_16['PRVDR_CTGRY_CD'] == 1) & (hospitals_
 hospitals_17 = pd.read_csv('pos2017.csv')
 hospitals_17['year'] = 2017
 
-#subset short term hospitals 2017
-short_term_17 = hospitals_17[(hospitals_17['PRVDR_CTGRY_CD'] == 1) & (hospitals_17['PRVDR_CTGRY_SBTYP_CD'] == 1)]
-
 #2018 data + add year column
 hospitals_18 = pd.read_csv('pos2018.csv', encoding='ISO-8859-1')
 #I had trouble loading data, so I copied error: "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x98 in position 11674: invalid start byte" to CGPT to debug 
 hospitals_18['year'] = 2018
 
-#subset short term hospitals 2018
-short_term_18 = hospitals_18[(hospitals_18['PRVDR_CTGRY_CD'] == 1) & (hospitals_18['PRVDR_CTGRY_SBTYP_CD'] == 1)]
-
 #2019 data + add year column 
 hospitals_19 = pd.read_csv('pos2019.csv', encoding='ISO-8859-1')
 hospitals_19['year'] = 2019
 
-#subset short term hospitals 2017
-short_term_19 = hospitals_19[(hospitals_19['PRVDR_CTGRY_CD'] == 1) & (hospitals_19['PRVDR_CTGRY_SBTYP_CD'] == 1)]
-
+#append dataframes
 hospitals = pd.concat([hospitals_16, hospitals_17, hospitals_18, hospitals_19], ignore_index=True)
 
+#save file to share with partner
 hospitals.to_csv('hospitals.csv', index=False)
+
+#subset short term hospitals
+short_term = hospitals[(hospitals['PRVDR_CTGRY_CD'] == 1) & (hospitals['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+```
+
+```{python}
+#plot observations by year 
+hospitals_grouped = short_term.groupby('year').size().reset_index(name='count')
+
+#plot number of short term observations for each year 
+alt.Chart(hospitals_grouped).mark_bar().encode(
+    x = alt.X('year:N', title = "Year"), 
+    y = alt.Y('count:Q', title = "Number of Observations") 
+).properties(
+    title = "Number of Short-Term Observations 2016-2019", 
+    width = 300
+)
 ```
 
 4. 
+```{python}
+hospitals_unique = short_term.groupby('year')['PRVDR_NUM'].nunique().reset_index(name='unique_count')
+
+alt.Chart(hospitals_unique).mark_bar().encode(
+    x = alt.X('year:N', title = "Year"), 
+    y = alt.Y('count:Q', title = "Number of Hospitals")
+).properties(
+    title = "Number of Short Term Hospitals 2016-2019", 
+    width = 300
+)
+```
+
     a.
     b.
 
