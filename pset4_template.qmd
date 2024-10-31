@@ -49,8 +49,9 @@ Please refer to the minilesson on code style
 pos2016 = pd.read_csv('/Users/ahonaroy/Documents/GitHub/POS_File_Hospital_Non_Hospital_Facilities_Q4_2016.csv')
 ```
 
-#setup 
+ 
 ```{python}
+#setup 
 import pandas as pd
 import os
 import geopandas as gpd
@@ -63,12 +64,12 @@ hospitals = pd.read_csv(file_path)
 1. We pulled provider category, facility name, original participation date, provider number, state code, termination expiration date, and zip codes from the Provider of Services data. 
 
 2. 
-
 ```{python}
-
+#subset short term hospitals
+short_term = hospitals[(hospitals['PRVDR_CTGRY_CD'] == 1) & (hospitals['PRVDR_CTGRY_SBTYP_CD'] == 1)]
 ```
 
-    a. There are _ hospitals reported in this data. This number makes/does not make sense. 
+    a. There are 7,245 hospitals reported in this data. This number makes/does not make sense. 
     b.
 3. 
 4. 
