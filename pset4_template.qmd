@@ -57,21 +57,47 @@ import os
 import geopandas as gpd
 import altair as alt
 
-file_path = r'C:\Users\Brenda\Documents\DAPII\pos2016.csv'
-hospitals = pd.read_csv(file_path)
+hospitals_16 = pd.read_csv('pos2016.csv')
 ```
 
 1. We pulled provider category, facility name, original participation date, provider number, state code, termination expiration date, and zip codes from the Provider of Services data. 
 
 2. 
 ```{python}
-#subset short term hospitals
-short_term = hospitals[(hospitals['PRVDR_CTGRY_CD'] == 1) & (hospitals['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+#add year column 
+hospitals_16['year'] = 2016
+
+#subset short term hospitals 2016
+short_term_16 = hospitals_16[(hospitals_16['PRVDR_CTGRY_CD'] == 1) & (hospitals_16['PRVDR_CTGRY_SBTYP_CD'] == 1)]
 ```
 
     a. There are 7,245 hospitals reported in this data. This number makes/does not make sense. 
     b.
 3. 
+```{python}
+#2017 data + add year column
+hospitals_17 = pd.read_csv('pos2017.csv')
+hospitals_17['year'] = 2017
+
+#subset short term hospitals 2017
+short_term_17 = hospitals_17[(hospitals_17['PRVDR_CTGRY_CD'] == 1) & (hospitals_17['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+
+#2018 data + add year column
+hospitals_18 = pd.read_csv('pos2018.csv', encoding='ISO-8859-1')
+#I had trouble loading data, so I copied error: "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x98 in position 11674: invalid start byte" to CGPT to debug 
+hospitals_18['year'] = 2018
+
+#subset short term hospitals 2018
+short_term_18 = hospitals_18[(hospitals_18['PRVDR_CTGRY_CD'] == 1) & (hospitals_18['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+
+#2019 data + add year column 
+hospitals_19 = pd.read_csv('pos2019.csv', encoding='ISO-8859-1')
+hospitals_19['year'] = 2019
+
+#subset short term hospitals 2017
+short_term_19 = hospitals_19[(hospitals_19['PRVDR_CTGRY_CD'] == 1) & (hospitals_19['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+```
+
 4. 
     a.
     b.
