@@ -143,9 +143,6 @@ hospitals_wide.reset_index(inplace=True)
 
 
 2. 
-```{python}
-
-```
 
 3. 
     a.
