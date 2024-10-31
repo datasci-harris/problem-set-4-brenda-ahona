@@ -46,17 +46,29 @@ Please refer to the minilesson on code style
 1. 
 
 ```{python}
+pos2016 = pd.read_csv('/Users/ahonaroy/Documents/GitHub/POS_File_Hospital_Non_Hospital_Facilities_Q4_2016.csv')
+```
+
+#setup 
+```{python}
 import pandas as pd
+import os
+import geopandas as gpd
 import altair as alt
 
-pos2016 = pd.read_csv('/Users/ahonaroy/Documents/GitHub/POS_File_Hospital_Non_Hospital_Facilities_Q4_2016.csv')
+file_path = r'C:\Users\Brenda\Documents\DAPII\pos2016.csv'
+hospitals = pd.read_csv(file_path)
+```
+
+1. We pulled provider category, facility name, original participation date, provider number, state code, termination expiration date, and zip codes from the Provider of Services data. 
+
+2. 
+
+```{python}
 
 ```
 
-We pulled provider category, facility name, original participation date, provider number, state code, termination experiration date, and zip codes. 
-
-2. 
-    a. 
+    a. There are _ hospitals reported in this data. This number makes/does not make sense. 
     b.
 3. 
 4. 
