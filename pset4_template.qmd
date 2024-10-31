@@ -94,9 +94,6 @@ hospitals_19['year'] = 2019
 #append dataframes
 hospitals = pd.concat([hospitals_16, hospitals_17, hospitals_18, hospitals_19], ignore_index=True)
 
-#save file to share with partner
-hospitals.to_csv('hospitals.csv', index=False)
-
 #subset short term hospitals
 short_term = hospitals[(hospitals['PRVDR_CTGRY_CD'] == 1) & (hospitals['PRVDR_CTGRY_SBTYP_CD'] == 1)]
 ```
