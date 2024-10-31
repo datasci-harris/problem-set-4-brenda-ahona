@@ -136,7 +136,14 @@ alt.Chart(hospitals_unique).mark_bar().encode(
 ## Identify hospital closures in POS file (15 pts) (*)
 
 1. 
+```{python}
+hospitals_wide = short_term.pivot(index = ['PRVDR_NUM', 'ZIP_CD', 'FAC_NAME', 'STATE_CD'], columns = 'year', values='PGM_TRMNTN_CD') 
+hospitals_wide.reset_index(inplace=True) 
+```
+
+
 2. 
+
 3. 
     a.
     b.
