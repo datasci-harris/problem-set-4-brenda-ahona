@@ -56,6 +56,7 @@ import pandas as pd
 import os
 import geopandas as gpd
 import altair as alt
+import matplotlib.pyplot as plt
 
 
 os.chdir('C:\\Users\\Brenda\\Documents\\DAPII\\')
@@ -152,8 +153,29 @@ alt.Chart(hospitals_unique).mark_bar().encode(
     b. The largest file is the .shp, about 0.8GB since it contains the main data file, followed by the .dbf file around 6,200 KB. The other files are much smaller, the .shx is 259KB, the .xml is 16KB, and the .prj is only 1KB. 
 2. 
 ```{python}
+#load zip code data
 zips = gpd.read_file('zips.shp')
-print(zips.head())
+
+#inspect columns
+print(zips.columns) #ZCTA5 is zip code column
+
+#restrict to TX zips
+texas = zips[zips['ZCTA5'].str.startswith(tuple(['75', '76', '77', '78', '79']))]
+texas.plot()
+
+#texas zips only
+texas_hospitals = short_term_16[short_term_16['STATE_CD'] == 'TX']
+#group by zip code
+texas_hospitals = texas_hospitals.groupby('ZIP_CD').size().reset_index(name='count')
+#rename zip code column and change to string type
+texas_hospitals.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
+texas_hospitals['ZCTA5'] = texas_hospitals['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
+
+#merge with texas zip code data
+texas_merged = texas.merge(texas_hospitals, left_on='ZCTA5', right_on='ZCTA5', how='left')
+
+texas_merged.plot(column = 'count', legend = True)
+
 ```
 
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
