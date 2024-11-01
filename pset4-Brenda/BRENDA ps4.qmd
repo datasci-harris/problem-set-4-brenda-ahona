@@ -1,0 +1,318 @@
+---
+title: "Brenda Castaneda and Ahona Roy"
+format: 
+  pdf:
+    keep-tex: true
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+include-before-body:
+  text: |
+    \RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+      showspaces = false,
+      showtabs = false,
+      breaksymbolleft={},
+      breaklines
+    }
+---
+
+**PS4:** Due Sat Nov 2 at 5:00PM Central. Worth 100 points. 
+We use (`*`) to indicate a problem that we think might be time consuming. 
+    
+## Style Points (10 pts) 
+Please refer to the minilesson on code style
+**[here](https://uchicago.zoom.us/rec/share/pG_wQ-pHTQrJTmqNn4rcrw5V194M2H2s-2jdy8oVhWHkd_yZt9o162IWurpA-fxU.BIQlSgZLRYctvzp-)**.
+
+## Submission Steps (10 pts)
+1. This problem set is a paired problem set.
+2. Play paper, scissors, rock to determine who goes first. Call that person *Partner 1*.
+    - Partner 1: Brenda Castaneda, brendac29
+    - Partner 2: Ahona Roy, ahona1
+3. Partner 1 will accept the `ps4` and then share the link it creates with their partner. You can only share it with one partner so you will not be able to change it after your partner has accepted. 
+4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*\B.C.\A.R\*\* \*\*\B.C\A.R.\*\*
+5. "I have uploaded the names of anyone else other than my partner and I worked with on the problem set **[here](https://docs.google.com/forms/d/185usrCREQaUbvAXpWhChkjghdGgmAZXA3lPWpXLLsts/edit)**"  (1 point)
+6. Late coins used this pset: \*\*\_\_\*\* Late coins left after submission: \*\*\_\_\*\*
+7. Knit your `ps4.qmd` to an PDF file to make `ps4.pdf`, 
+    * The PDF should not be more than 25 pages. Use `head()` and re-size figures when appropriate. 
+8. (Partner 1): push  `ps4.qmd` and `ps4.pdf` to your github repo.
+9. (Partner 1): submit `ps4.pdf` via Gradescope. Add your partner on Gradescope.
+10. (Partner 1): tag your submission in Gradescope
+
+**Important:** Repositories are for tracking code. **Do not commit the data or shapefiles to your repo.** The best way to do this is with `.gitignore`, which we have covered in class. If you do accidentally commit the data, Github has a [guide](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github#removing-files-from-a-repositorys-history). The best course of action depends on whether you have pushed yet. This also means that both partners will have to download the initial raw data and any data cleaning code will need to be re-run on both partners' computers. 
+
+## Download and explore the Provider of Services (POS) file (10 pts)
+
+1. 
+
+```{python}
+pos2016 = pd.read_csv('/Users/ahonaroy/Documents/GitHub/POS_File_Hospital_Non_Hospital_Facilities_Q4_2016.csv')
+```
+
+ 
+```{python}
+#setup 
+import pandas as pd
+import os
+import geopandas as gpd
+import altair as alt
+import matplotlib.pyplot as plt
+
+
+os.chdir('C:\\Users\\Brenda\\Documents\\DAPII\\')
+hospitals_16 = pd.read_csv('pos2016.csv')
+```
+
+1. We pulled provider category, facility name, original participation date, provider number, state code, termination expiration date, and zip codes from the Provider of Services data. 
+
+2. 
+```{python}
+#add year column 
+hospitals_16['year'] = 2016
+
+#subset short term hospitals 2016
+short_term_16 = hospitals_16[(hospitals_16['PRVDR_CTGRY_CD'] == 1) & (hospitals_16['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+```
+
+    a. There are 7,245 hospitals reported in this data. This number makes/does not make sense. 
+    b.
+3. 
+```{python}
+#2017 data + add year column
+hospitals_17 = pd.read_csv('pos2017.csv')
+hospitals_17['year'] = 2017
+
+#2018 data + add year column
+hospitals_18 = pd.read_csv('pos2018.csv', encoding='ISO-8859-1')
+#I had trouble loading data, so I copied error: "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x98 in position 11674: invalid start byte" to CGPT to debug 
+hospitals_18['year'] = 2018
+
+#2019 data + add year column 
+hospitals_19 = pd.read_csv('pos2019.csv', encoding='ISO-8859-1')
+hospitals_19['year'] = 2019
+
+#append dataframes
+hospitals = pd.concat([hospitals_16, hospitals_17, hospitals_18, hospitals_19], ignore_index=True)
+
+#subset short term hospitals
+short_term = hospitals[(hospitals['PRVDR_CTGRY_CD'] == 1) & (hospitals['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+```
+
+```{python}
+#plot observations by year 
+hospitals_grouped = short_term.groupby('year').size().reset_index(name='count')
+
+#plot number of short term observations for each year 
+alt.Chart(hospitals_grouped).mark_bar().encode(
+    x = alt.X('year:N', title = "Year"), 
+    y = alt.Y('count:Q', title = "Number of Observations") 
+).properties(
+    title = "Number of Short-Term Observations 2016-2019", 
+    width = 300
+)
+```
+
+4. 
+```{python}
+#group by year and find unique CMS numbers
+hospitals_unique = short_term.groupby('year')['PRVDR_NUM'].nunique().reset_index(name='unique_count')
+
+#plot number of short term hospitals for each year
+alt.Chart(hospitals_unique).mark_bar().encode(
+    x = alt.X('year:N', title = "Year"), 
+    y = alt.Y('unique_count:Q', title = "Number of Hospitals")
+).properties(
+    title = "Number of Short Term Hospitals 2016-2019", 
+    width = 300
+)
+```
+
+    a.
+    b.
+
+## Identify hospital closures in POS file (15 pts) (*)
+
+1. 
+```{python}
+#reshape data so each row is a unique hospital and each column year-termination combo
+hospitals_wide = short_term.pivot(index = ['PRVDR_NUM', 'ZIP_CD', 'FAC_NAME', 'STATE_CD'], columns = 'year', values='PGM_TRMNTN_CD') 
+hospitals_wide.reset_index(inplace=True) 
+
+closures = hospitals_wide[
+    (hospitals_wide[2016] == 0) & #active in 2016
+    ((hospitals_wide[2019] != 0) | hospitals_wide[2019].isna()) #not active/dropped 2019
+]        
+```
+
+
+2. 
+
+3. 
+    a.
+    b.
+    c.
+
+## Download Census zip code shapefile (10 pt) 
+
+1. 
+    a. .dbf: Contains information about attributes of the shapes in the data.  
+       .prg: Contains information about the coordinate reference system. 
+       .shp: Contains the geometric feature data, it's the main data file and the largest. 
+       .shx: Contains the positional index of the geometric data. 
+       .xml: This file contains information about the data. 
+    b. The largest file is the .shp, about 0.8GB since it contains the main data file, followed by the .dbf file around 6,200 KB. The other files are much smaller, the .shx is 259KB, the .xml is 16KB, and the .prj is only 1KB. 
+2. 
+```{python}
+#load zip code data
+zips = gpd.read_file('zips.shp')
+
+#inspect columns
+print(zips.columns) #ZCTA5 is zip code column
+
+#restrict to TX zips
+texas = zips[zips['ZCTA5'].str.startswith(tuple(['75', '76', '77', '78', '79']))]
+texas.plot()
+
+#texas zips only
+texas_hospitals = short_term_16[short_term_16['STATE_CD'] == 'TX']
+#group by zip code
+texas_hospitals = texas_hospitals.groupby('ZIP_CD').size().reset_index(name='count')
+
+#rename zip code column and change to string type
+texas_hospitals.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
+texas_hospitals['ZCTA5'] = texas_hospitals['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
+
+#merge with texas zip code data
+texas_merged = texas.merge(texas_hospitals, left_on='ZCTA5', right_on='ZCTA5', how='left')
+
+#plot choropleth of hospitals 
+texas_merged.plot(column = 'count', legend = True)
+```
+
+## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
+
+1. 
+```{python}
+zips['centroid'] = zips.geometry.centroid
+
+zips_all_centroids = gpd.GeoDataFrame(geometry=zips['centroid'])
+zips_all_centroids['zip_code'] = zips['ZCTA5']
+print(zips_centroids.head())
+```
+
+2. 
+```{python}
+#texas centroids
+texas['centroid'] = texas.geometry.centroid
+zips_texas_centroids=gpd.GeoDataFrame(geometry=texas['centroid'])
+zips_texas_centroids['ZCTA5'] = texas['ZCTA5']
+print(zips_texas_centroids.head())
+
+#texas + border state centroids
+texas_borderstates = zips[zips['ZCTA5'].str.startswith(tuple(['75', '76', '77', '78', '79', 
+'870', '871', '872', '873', '874', '875', '876', '877', '878', '879', '880', '881', '882', '883', '884',
+'73', '74',
+'716', '717', '718', '719', '720', '721', '722', '723', '724', '725', '726', '727', '728', '729', 
+'700', '701', '702', '703', '704', '705', '706', '707', '707', '708', '709', '710', '711', '712', '713', '714', '715']))]
+
+texas_borderstates['centroid'] = texas_borderstates.geometry.centroid
+zips_texas_borderstates_centroids = gpd.GeoDataFrame(geometry = texas_borderstates['centroid'])
+zips_texas_borderstates_centroids['ZCTA5'] = texas_borderstates['ZCTA5']
+print(zips_texas_borderstates_centroids.head())
+```
+
+3.  
+```{python}
+#rename zip code column and change to string type
+short_term_16.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
+short_term_16['ZCTA5'] = short_term_16['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
+
+#merge borderstate zips with hospitals data
+zips_withhospitals_centroids = zips_texas_borderstates_centroids.merge(short_term_16, on = 'ZCTA5', how = 'inner')
+
+#subset open hospitals in 2016
+zips_withhospitals_centroids = zips_withhospitals_centroids[zips_withhospitals_centroids['PGM_TRMNTN_CD']==0]
+```
+
+4. 
+    a.
+```{python}
+#subset 10 zips
+zips_10texas_centroids = zips_texas_centroids.head(10)
+
+#calculate distance
+distance=gpd.sjoin_nearest(
+    zips_10texas_centroids,
+    zips_withhospitals_centroids,
+    how='inner', 
+    distance_col = 'distance'
+)
+print(distance.head())
+
+```
+
+    b.
+```{python}
+distance=gpd.sjoin_nearest(
+    zips_texas_centroids,
+    zips_withhospitals_centroids,
+    how='inner', 
+    distance_col = 'distance'
+)
+print(distance.head())
+
+```
+
+5. 
+    a.
+    b.
+    c.
+
+```{python}
+
+```    
+
+## Effects of closures on access in Texas (15 pts)
+
+1. 
+```{python}
+#subset texas hospital closures
+texas_closures = closures[closures['STATE_CD'] == 'TX']
+
+#group by zipcode and count closures per zip
+texas_closures = texas_closures.groupby('ZIP_CD').size().reset_index(name='count')
+
+texas_closures.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
+texas_closures['ZCTA5'] = texas_closures['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
+```
+
+2. 
+```{python}
+closures_merge = texas.merge(texas_closures, left_on = 'ZCTA5', right_on = 'ZCTA5', how = 'left')
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+closures_merge.boundary.plot(ax=ax, color='black')  # Optional: to show boundaries
+closures_merge.plot(column='count', ax=ax, legend=True,
+                    cmap='OrRd',  # Choose a color map
+                    missing_kwds={'color': 'lightgrey', 'label': 'No closures'},
+                    edgecolor='black')  # Optional: adds a border around each ZIP code
+
+# Add titles and labels
+ax.set_title('Hospital Closures in Texas (2016-2019)')
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+
+# Show the plot
+plt.show()
+```
+
+There are 97 affected zip codes in Texas
+
+3. 
+
+4. 
+```{python}
+
+```
+
+## Reflecting on the exercise (10 pts) 
