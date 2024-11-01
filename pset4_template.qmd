@@ -134,8 +134,14 @@ alt.Chart(hospitals_unique).mark_bar().encode(
 
 1. 
 ```{python}
+#reshape data so each row is a unique hospital and each column year-termination combo
 hospitals_wide = short_term.pivot(index = ['PRVDR_NUM', 'ZIP_CD', 'FAC_NAME', 'STATE_CD'], columns = 'year', values='PGM_TRMNTN_CD') 
 hospitals_wide.reset_index(inplace=True) 
+
+closures = hospitals_wide[
+    (hospitals_wide[2016] == 0) & #active in 2016
+    ((hospitals_wide[2019] != 0) | hospitals_wide[2019].isna()) #not active/dropped 2019
+]        
 ```
 
 
@@ -171,6 +177,7 @@ texas.plot()
 texas_hospitals = short_term_16[short_term_16['STATE_CD'] == 'TX']
 #group by zip code
 texas_hospitals = texas_hospitals.groupby('ZIP_CD').size().reset_index(name='count')
+
 #rename zip code column and change to string type
 texas_hospitals.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
 texas_hospitals['ZCTA5'] = texas_hospitals['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
@@ -185,21 +192,108 @@ texas_merged.plot(column = 'count', legend = True)
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
 1. 
+```{python}
+zips['centroid'] = zips.geometry.centroid
+
+zips_all_centroids = gpd.GeoDataFrame(geometry=zips['centroid'])
+zips_all_centroids['zip_code'] = zips['ZCTA5']
+print(zips_centroids.head())
+```
+
 2. 
-3. 
+```{python}
+#texas centroids
+texas['centroid'] = texas.geometry.centroid
+zips_texas_centroids=gpd.GeoDataFrame(geometry=texas['centroid'])
+zips_texas_centroids['ZCTA5'] = texas['ZCTA5']
+print(zips_texas_centroids.head())
+
+#texas + border state centroids
+texas_borderstates = zips[zips['ZCTA5'].str.startswith(tuple(['75', '76', '77', '78', '79', 
+'870', '871', '872', '873', '874', '875', '876', '877', '878', '879', '880', '881', '882', '883', '884',
+'73', '74',
+'716', '717', '718', '719', '720', '721', '722', '723', '724', '725', '726', '727', '728', '729', 
+'700', '701', '702', '703', '704', '705', '706', '707', '707', '708', '709', '710', '711', '712', '713', '714', '715']))]
+
+texas_borderstates['centroid'] = texas_borderstates.geometry.centroid
+zips_texas_borderstates_centroids = gpd.GeoDataFrame(geometry = texas_borderstates['centroid'])
+zips_texas_borderstates_centroids['ZCTA5'] = texas_borderstates['ZCTA5']
+print(zips_texas_borderstates_centroids.head())
+```
+
+3.  
+```{python}
+#rename zip code column and change to string type
+short_term_16.rename(columns={'ZIP_CD': 'ZCTA5'}, inplace=True)
+short_term_16['ZCTA5'] = short_term_16['ZCTA5'].astype(str).str.replace('.0', '', regex=False)
+
+#merge borderstate zips with hospitals data
+zips_withhospitals_centroids = zips_texas_borderstates_centroids.merge(short_term_16, on = 'ZCTA5', how = 'inner')
+
+#subset open hospitals in 2016
+zips_withhospitals_centroids = zips_withhospitals_centroids[zips_withhospitals_centroids['PGM_TRMNTN_CD']==0]
+```
+
 4. 
     a.
+```{python}
+#subset 10 zips
+zips_10texas_centroids = zips_texas_centroids.head(10)
+
+#calculate distance
+distance=gpd.sjoin_nearest(
+    zips_10texas_centroids,
+    zips_withhospitals_centroids,
+    how='inner', 
+    distance_col = 'distance'
+)
+print(distance.head())
+
+```
+
     b.
+```{python}
+distance=gpd.sjoin_nearest(
+    zips_texas_centroids,
+    zips_withhospitals_centroids,
+    how='inner', 
+    distance_col = 'distance'
+)
+print(distance.head())
+
+```
+
 5. 
     a.
     b.
     c.
-    
+
+```{python}
+
+```    
 ## Effects of closures on access in Texas (15 pts)
 
 1. 
+```{python}
+#subset texas hospital closures
+texas_closures = closures[closures['STATE_CD'] == 'TX']
+
+#group by zipcode and count closures per zip
+texas_closures = texas_closures.groupby('ZIP_CD').size().reset_index(name='count')
+```
+
 2. 
+```{python}
+
+```
+
+There are 97 affected zip codes in Texas
+
 3. 
+
 4. 
+```{python}
+
+```
 
 ## Reflecting on the exercise (10 pts) 
