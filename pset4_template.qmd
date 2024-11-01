@@ -145,7 +145,50 @@ closures = hospitals_wide[
 ```
 
 
+```{python}
+closures = hospitals_wide[
+    (hospitals_wide[2016] ==0) &
+    ((hospitals_wide[2019] !=0) | 
+    (hospitals_wide[2019].isna()))
+]
+```
+
+There are 685 hospitals that fit this definition. 
+
 2. 
+```{python}
+missing_values = hospitals_wide[hospitals_wide.isnull().any(axis=1)]
+
+# Display the first 10 rows with missing values
+first_10_missing = missing_values.head(10)
+print(first_10_missing)
+```
+
+
+```{python}
+
+# Sort the closures DataFrame by hospital name (FAC_NAME)
+closures_sorted = closures.sort_values(by='FAC_NAME')
+
+# Select the relevant columns: hospital name and suspected closure year
+result = closures_sorted[['FAC_NAME']].head(10)
+
+# Display the first 10 rows
+print(result)
+```
+
+
+(1) ABRAZO MARYVALE CAMPUS closed in 2017.
+(2) AD HOSPITAL EAST closed in 2017.
+(3) ADIRONDACK MEDICAL CENTER closed in 2019.
+(4) ADVENTIST HEALTHCARE WASHING closed in 2019.
+(5) ADVENTIST MEDICAL CENTER-OR  closed in 2018.
+(6) ADVENTIST MEDICAL CENTER-CA closed in 2017.
+(7) ADVENTIST MEDICAL CENTER- CEN closed in 2017.
+(8) ADVENTIST MEDICAL CENTER- REED closed in 2017.
+(9) AFFINITY MEDICAL CENTER closed in 2018.
+(10) ALBANY MEDICAL CENTER/SOUTH closed in 2017. 
+
 
 3. 
     a.
